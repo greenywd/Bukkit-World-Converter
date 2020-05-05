@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import os
+from distutils.dir_util import copy_tree
+import shutil
 import sys
 import argparse
 
@@ -41,10 +43,35 @@ class WorldConverter:
             print(error)
             sys.exit(1)
 
-        output_path = 'Converted/'
+        output_path = 'Converted/%s' % (world_name)
         
         if not os.path.exists(output_path):
+            # Overworld
             os.makedirs(output_path, exist_ok=True)
+            # Nether
+            os.makedirs(output_path + '/DIM-1', exist_ok=True)
+            # The End
+            os.makedirs(output_path + '/DIM1', exist_ok=True)
+
+        # Copy Worlds to Temp/
+        print("Copying Worlds...")
+        copy_tree(path + world_name, 'Temp/Overworld/')
+        copy_tree(path + world_name + '_nether', 'Temp/Nether/')
+        copy_tree(path + world_name + '_the_end', 'Temp/TheEnd/')
+
+        print("-- Copying Overworld...")
+        copy_tree('Temp/Overworld/', output_path)
+
+        print("-- Copying Nether...")
+        copy_tree('Temp/Nether/DIM-1', output_path + '/DIM-1')
+        
+        print("-- Copying The End...")
+        copy_tree('Temp/TheEnd/DIM1', output_path + '/DIM1')
+
+        print("Removing Temp files...")
+        shutil.rmtree('Temp')
+
+        print("Done!")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='Bukkit World Converter', description='Convert Bukkit Server worlds to Singleplayer worlds.', epilog='If no arguments are given, nothing will happen.')
